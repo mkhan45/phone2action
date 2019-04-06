@@ -17,28 +17,32 @@ import com.eclipsesource.json.JsonObject.Member;
 
 public class APIHelper
 {
-    public static void main(String[] args) throws IOException
+    String APIKey;
+    String address;
+
+    public APIHelper(String _address) throws IOException
     {
         // Our Phone2Action API Key goes here
         // Super important, we need this to show that we're authorized to make our request
-        String xAPIKey = ""; // Should not be an empty String, see the README for info on how to get an API Key
-
+        APIKey = "ie5EtNqb2pafUpw0FsMC84hHqrW9L4uf2Ql9YTJF"; // Should not be an empty String, see the README for info on how to get an API Key
+        address = _address;
         // First, we construct the URL we'll make our HTTP GET Request to:
+
+    }
+
+    public String getRepresentativesByAddress() throws MalformedURLException, UnsupportedEncodingException, IOException{
         String endpoint = "https://fmrrixuk32.execute-api.us-east-1.amazonaws.com/hacktj/legislators";
         String parameters = "?level=NATIONAL_LOWER&address=";
-        String address = "6560 Braddock Rd"; // Change this to match your address!
         String addressFormatted = URLEncoder.encode(address, "UTF-8"); // This formats the article title for our URL
-        URL phone2ActionURL = new URL(endpoint + parameters + addressFormatted); // This is the Java URL class, necessary here
+        URL url = new URL(endpoint + parameters + addressFormatted); // This is the Java URL class, necessary here
 
         // Then, we set up the HTTP GET Request itself
-        HttpURLConnection connection = (HttpURLConnection) phone2ActionURL.openConnection();
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET"); // We need to set the HTTP Request type!
-        connection.setRequestProperty("X-API-Key", xAPIKey); // We pass in the API Key to access the Phone2Action API
+        connection.setRequestProperty("X-API-Key", APIKey); // We pass in the API Key to access the Phone2Action API
 
         // Now, we're able to fire the configured HTTP GET Request with the getInputStream() method
         InputStream response = connection.getInputStream(); // The HttpURLConnection's response is an InputStream
-
-        // Next, we convert the response to a JsonObject with Minimal JSON
         Scanner scanner = new Scanner(response);
         String responseBody = scanner.useDelimiter("\\A").next(); // The response is a String, which isn't useful
         JsonObject responseObject = Json.parse(responseBody).asObject(); // This converts it to a (useful) JsonObject
@@ -55,6 +59,7 @@ public class APIHelper
             String lastName = responseRepresentative.asObject().get("last_name").asString();
             System.out.println("Your Representative in national Congress is " + firstName + " " + lastName); // We convert the key's value to a JsonObject
         }
+        return "";
     }
 }
 
