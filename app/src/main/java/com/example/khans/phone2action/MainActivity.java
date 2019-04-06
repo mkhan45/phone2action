@@ -13,18 +13,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.i("test", "test");
         try {
-            Thread run = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        APIHelper helper = new APIHelper("Alexandria VA");
-                        helper.getRepresentativesByAddress();
-                    } catch (Exception e){
-                        Log.i("error", e.toString());
-                    }
-                }
-            });
-            run.run();
+            APIHelper helper = new APIHelper("Alexandria VA", getApplicationContext());
+            Log.i("tag", helper.getRepresentativesByAddress());
         }catch(Exception e){
             Log.i("Error", e.toString());
         }

@@ -1,9 +1,26 @@
 package com.example.khans.phone2action;
 
 // We import some standard Java classes to make our HTTP Request
+import android.content.Context;
+import android.util.Log;
+
 import java.net.*;
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import com.eclipsesource.json.*;
 
@@ -15,51 +32,50 @@ import com.eclipsesource.json.*;
 // Documentation for this package here: https://github.com/ralfstx/minimal-json
 import com.eclipsesource.json.JsonObject.Member;
 
+import static java.security.AccessController.getContext;
+
 public class APIHelper
 {
     String APIKey;
     String address;
+    Context context;
 
-    public APIHelper(String _address) throws IOException
+    public APIHelper(String _address, Context _context) throws IOException
     {
         // Our Phone2Action API Key goes here
         // Super important, we need this to show that we're authorized to make our request
         APIKey = "ie5EtNqb2pafUpw0FsMC84hHqrW9L4uf2Ql9YTJF"; // Should not be an empty String, see the README for info on how to get an API Key
         address = _address;
+        context = _context;
         // First, we construct the URL we'll make our HTTP GET Request to:
 
     }
 
     public String getRepresentativesByAddress() throws MalformedURLException, UnsupportedEncodingException, IOException{
-        String endpoint = "https://fmrrixuk32.execute-api.us-east-1.amazonaws.com/hacktj/legislators";
-        String parameters = "?level=NATIONAL_LOWER&address=";
-        String addressFormatted = URLEncoder.encode(address, "UTF-8"); // This formats the article title for our URL
-        URL url = new URL(endpoint + parameters + addressFormatted); // This is the Java URL class, necessary here
+        String url = "https://api.propublica.org/115/1/";
+        String retString = "error";
 
-        // Then, we set up the HTTP GET Request itself
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET"); // We need to set the HTTP Request type!
-        connection.setRequestProperty("X-API-Key", APIKey); // We pass in the API Key to access the Phone2Action API
+        RequestQueue queue = Volley.newRequestQueue(context);
 
-        // Now, we're able to fire the configured HTTP GET Request with the getInputStream() method
-        InputStream response = connection.getInputStream(); // The HttpURLConnection's response is an InputStream
-        Scanner scanner = new Scanner(response);
-        String responseBody = scanner.useDelimiter("\\A").next(); // The response is a String, which isn't useful
-        JsonObject responseObject = Json.parse(responseBody).asObject(); // This converts it to a (useful) JsonObject
-        scanner.close();
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+                        Log.i("in reponse", "test");
+                        Log.i("response:", response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.i("error", "no response");
+            }
+        });
 
-        // Finally, we pick out the data we want and print it to the console
-        // Use Postman to figure out what format your data is in and access it accordingly
-        // A sample JSON is also available at https://github.com/phone2action/hacktj-examples#legislators-api
-        JsonArray responseRepresentatives = responseObject.get("officials").asArray();
-        // We don't know what each of the keys of the response's pages will be, so we loop through all of them
-        for (JsonValue responseRepresentative : responseRepresentatives) // Each key is a Member object, provided by Minimal JSON
-        {
-            String firstName = responseRepresentative.asObject().get("first_name").asString();
-            String lastName = responseRepresentative.asObject().get("last_name").asString();
-            System.out.println("Your Representative in national Congress is " + firstName + " " + lastName); // We convert the key's value to a JsonObject
-        }
-        return "";
+
+
+        return retString;
     }
 }
+
 
